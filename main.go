@@ -35,7 +35,7 @@ func main() {
 		// TODO
 	case "--version", "-v":
 		// TODO
-	case "--help", "-h":
+	case "--help", "-h", "help", "h":
 		help()
 	default:
 		fmt.Println("pbmenv: '" + subCommand + "' is not a pbmenv command. See 'pbmenv --help'.")
