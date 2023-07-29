@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"main/internal"
 	"os"
-	"regexp"
 )
 
 func main() {
@@ -19,7 +16,7 @@ func main() {
 	subCommand := args[0]
 	switch subCommand {
 	case "available_versions", "av", "a":
-		availableVersions := AvailableVersions()
+		availableVersions := internal.AvailableVersions()
 		for _, version := range availableVersions {
 			fmt.Println(version)
 		}
@@ -40,45 +37,6 @@ func main() {
 	default:
 		fmt.Println("pbmenv: '" + subCommand + "' is not a pbmenv command. See 'pbmenv --help'.")
 	}
-}
-
-func AvailableVersions() []string {
-	url := "https://api.github.com/repos/splaplapla/procon_bypass_man/tags"
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Println("Error making the request", err)
-		return nil
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading the response", err)
-		return nil
-	}
-
-	var jsonResp []map[string]interface{}
-	if err := json.Unmarshal(body, &jsonResp); err != nil {
-		fmt.Println("Error parsing the response", err)
-		return nil
-	}
-	versions := extractVersions(jsonResp)
-	return versions
-}
-
-func extractVersions(jsonResp []map[string]interface{}) []string {
-	re := regexp.MustCompile(`v([\d.]+)$`)
-	versions := []string{}
-
-	for _, tag := range jsonResp {
-		if name, ok := tag["name"].(string); ok {
-			if matches := re.FindStringSubmatch(name); len(matches) == 2 {
-				versions = append(versions, matches[1])
-			}
-		}
-	}
-
-	return versions
 }
 
 func help() {
