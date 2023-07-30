@@ -8,9 +8,14 @@ import (
 	"regexp"
 )
 
-func AvailableVersions() []string {
+type HttpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+func AvailableVersions(client HttpClient) []string {
 	url := "https://api.github.com/repos/splaplapla/procon_bypass_man/tags"
-	resp, err := http.Get(url)
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error making the request", err)
 		return nil

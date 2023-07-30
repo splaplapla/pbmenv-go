@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"main/internal"
+	"net/http"
 	"os"
 )
 
@@ -16,7 +17,8 @@ func main() {
 	subCommand := args[0]
 	switch subCommand {
 	case "available_versions", "av", "a":
-		availableVersions := internal.AvailableVersions()
+		client := &http.Client{}
+		availableVersions := internal.AvailableVersions(client)
 		for _, version := range availableVersions {
 			fmt.Println(version)
 		}
