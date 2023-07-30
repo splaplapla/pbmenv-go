@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+const VERSION = "0.1.0"
+
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
@@ -36,7 +38,7 @@ func main() {
 	case "clean", "c":
 		// TODO
 	case "--version", "-v":
-		// TODO
+		fmt.Println(VERSION)
 	case "--help", "-h", "help", "h":
 		help()
 	default:
