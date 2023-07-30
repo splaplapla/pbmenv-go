@@ -1,73 +1,18 @@
 package internal
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"regexp"
 )
 
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-type GithubClient struct {
-	Http      HTTPClient
-	RepoOwner string
-	RepoName  string
-}
-
-type GithubTag struct {
-	Name string `json:"name"`
-}
-
-func (c *GithubClient) tags() ([]GithubTag, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/tags", c.RepoOwner, c.RepoName)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	resp, err := c.Http.Do(req)
+func AvailableVersions(client HTTPClient) ([]string, error) {
+	versions, err := PBMGithubClient(client).availableVersions()
 	if err != nil {
-		return nil, err
+		return []string{}, err
 	}
-	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var tags []GithubTag
-	if err := json.Unmarshal(body, &tags); err != nil {
-		return nil, err
-	}
-	return tags, nil
-}
-
-func (c *GithubClient) availableVersions() ([]string, error) {
-	tags, err := c.tags()
-	if err != nil {
-		return nil, err
-	}
-	return extractVersions(tags), nil
-}
-
-func AvailableVersions(client HTTPClient) []string {
-	githubClient := &GithubClient{
-		Http:      client,
-		RepoOwner: "splaplapla",
-		RepoName:  "procon_bypass_man",
-	}
-	versions, _ := githubClient.availableVersions()
-	return versions
-}
-
-func extractVersions(tags []GithubTag) []string {
-	re := regexp.MustCompile(`v([d\d.]+)$`)
-	versions := []string{}
-
-	for _, tag := range tags {
-		if matches := re.FindStringSubmatch(tag.Name); len(matches) == 2 {
-			versions = append(versions, matches[1])
-		}
-	}
-	return versions
+	return versions, nil
 }

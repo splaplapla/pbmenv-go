@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"main/internal"
 	"net/http"
 	"os"
@@ -17,8 +18,10 @@ func main() {
 	subCommand := args[0]
 	switch subCommand {
 	case "available_versions", "av", "a":
-		client := &http.Client{}
-		availableVersions := internal.AvailableVersions(client)
+		availableVersions, err := internal.AvailableVersions(&http.Client{})
+		if err != nil {
+			log.Fatalf("Error: %s", err)
+		}
 		for _, version := range availableVersions {
 			fmt.Println(version)
 		}
