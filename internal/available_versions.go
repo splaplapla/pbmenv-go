@@ -8,46 +8,66 @@ import (
 	"regexp"
 )
 
-type HttpClient interface {
+type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-func AvailableVersions(client HttpClient) []string {
-	url := "https://api.github.com/repos/splaplapla/procon_bypass_man/tags"
+type GithubClient struct {
+	Http      HTTPClient
+	RepoOwner string
+	RepoName  string
+}
+
+type GithubTag struct {
+	Name string `json:"name"`
+}
+
+func (c *GithubClient) tags() ([]GithubTag, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/tags", c.RepoOwner, c.RepoName)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	resp, err := client.Do(req)
+	resp, err := c.Http.Do(req)
 	if err != nil {
-		fmt.Println("Error making the request", err)
-		return nil
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading the response", err)
-		return nil
+		return nil, err
 	}
+	var tags []GithubTag
+	if err := json.Unmarshal(body, &tags); err != nil {
+		return nil, err
+	}
+	return tags, nil
+}
 
-	var jsonResp []map[string]interface{}
-	if err := json.Unmarshal(body, &jsonResp); err != nil {
-		fmt.Println("Error parsing the response", err)
-		return nil
+func (c *GithubClient) availableVersions() ([]string, error) {
+	tags, err := c.tags()
+	if err != nil {
+		return nil, err
 	}
-	versions := extractVersions(jsonResp)
+	return extractVersions(tags), nil
+}
+
+func AvailableVersions(client HTTPClient) []string {
+	githubClient := &GithubClient{
+		Http:      client,
+		RepoOwner: "splaplapla",
+		RepoName:  "procon_bypass_man",
+	}
+	versions, _ := githubClient.availableVersions()
 	return versions
 }
 
-func extractVersions(jsonResp []map[string]interface{}) []string {
-	re := regexp.MustCompile(`v([\d.]+)$`)
+func extractVersions(tags []GithubTag) []string {
+	re := regexp.MustCompile(`v([d\d.]+)$`)
 	versions := []string{}
 
-	for _, tag := range jsonResp {
-		if name, ok := tag["name"].(string); ok {
-			if matches := re.FindStringSubmatch(name); len(matches) == 2 {
-				versions = append(versions, matches[1])
-			}
+	for _, tag := range tags {
+		if matches := re.FindStringSubmatch(tag.Name); len(matches) == 2 {
+			versions = append(versions, matches[1])
 		}
 	}
-
 	return versions
 }
