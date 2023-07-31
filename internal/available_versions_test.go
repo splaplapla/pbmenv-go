@@ -15,7 +15,6 @@ func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
 	return m.DoFunc(req)
 }
 
-// TODO: error handling tests
 func TestAvailableVersions(t *testing.T) {
 	mockClient := &MockClient{
 		DoFunc: func(req *http.Request) (*http.Response, error) {
@@ -43,5 +42,39 @@ func TestAvailableVersions(t *testing.T) {
 		if v != expected[i] {
 			t.Errorf("Expected '%s', got '%s'", expected[i], v)
 		}
+	}
+}
+
+func TestAvailableVersions_NotJson(t *testing.T) {
+	mockClient := &MockClient{
+		DoFunc: func(req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(strings.NewReader("not json")),
+			}, nil
+		},
+	}
+
+	_, err := AvailableVersions(mockClient)
+
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+}
+
+func TestAvailableVersions_ErrorCase(t *testing.T) {
+	mockClient := &MockClient{
+		DoFunc: func(req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 500,
+				Body:       ioutil.NopCloser(strings.NewReader("")),
+			}, nil
+		},
+	}
+
+	_, err := AvailableVersions(mockClient)
+
+	if err == nil {
+		t.Errorf("Expected error, got nil")
 	}
 }
