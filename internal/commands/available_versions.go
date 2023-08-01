@@ -1,6 +1,7 @@
-package internal
+package commands
 
 import (
+	"main/internal"
 	"net/http"
 )
 
@@ -9,7 +10,7 @@ type HTTPClient interface {
 }
 
 func AvailableVersions(client HTTPClient) ([]string, error) {
-	versions, err := PBMGithubClient(client).availableVersions()
+	versions, err := internal.PBMGithubClient(client).AvailableVersions()
 	if err != nil {
 		return []string{}, err
 	}

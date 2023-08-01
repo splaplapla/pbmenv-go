@@ -8,6 +8,10 @@ import (
 	"regexp"
 )
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type GithubClient struct {
 	Http      HTTPClient
 	RepoOwner string
@@ -38,7 +42,7 @@ func (c *GithubClient) tags() ([]GithubTag, error) {
 	return tags, nil
 }
 
-func (c *GithubClient) availableVersions() ([]string, error) {
+func (c *GithubClient) AvailableVersions() ([]string, error) {
 	tags, err := c.tags()
 	if err != nil {
 		return nil, err

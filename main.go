@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"main/internal"
+	"main/internal/commands"
 	"net/http"
 	"os"
 )
@@ -20,7 +20,7 @@ func main() {
 	subCommand := args[0]
 	switch subCommand {
 	case "available_versions", "av", "a":
-		availableVersions, err := internal.AvailableVersions(&http.Client{})
+		availableVersions, err := commands.AvailableVersions(&http.Client{})
 		if err != nil {
 			log.Fatalf("Error: %s", err)
 		}
