@@ -30,7 +30,27 @@ func main() {
 	case "versions", "v":
 		// TODO
 	case "install", "i":
-		// TODO
+		if len(args) < 2 {
+			fmt.Println("pbmenv: 'install' requires a version argument. See 'pbmenv --help'.")
+			os.Exit(1)
+		}
+
+		subCommandArg := args[1]
+		useOption := false
+		if len(args) > 2 {
+			switch args[2] {
+			case "--use", "-u":
+				useOption = true
+			default:
+				fmt.Println("pbmenv: '" + args[2] + "' is not a pbmenv option. See 'pbmenv --help'.")
+				os.Exit(1)
+			}
+		}
+
+		_, err := commands.InstallVersion(&http.Client{}, subCommandArg, useOption)
+		if err != nil {
+			log.Fatalf("Error: %s", err)
+		}
 	case "use", "u":
 		// TODO
 	case "uninstall":
@@ -48,13 +68,12 @@ func main() {
 
 func help() {
 	fmt.Println(`Usage: pbmenv [command]
-
-	Available commands:
-	available_versions    Display the available versions of pbmenv
-	versions              List the installed versions of pbmenv
-	install               Install a specific version of pbmenv
-	use                   Set a specific version of pbmenv as the active version
-	uninstall             Uninstall a specific version of pbmenv
-	clean                 Remove old installed versions of pbmenv`)
+  Available commands:
+    available_versions    Display the available versions of pbmenv.
+    versions              List the installed versions of pbmenv.
+    install               Install a specific version of pbmenv. (optionally, use the --use or -u flag to use the installed version)
+    use                   Set a specific version of pbmenv as the active version.
+    uninstall             Uninstall a specific version of pbmenv.
+    clean                 Remove old installed versions of pbmenv.`)
 	return
 }
