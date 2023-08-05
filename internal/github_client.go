@@ -62,6 +62,19 @@ func (c *GithubClient) extractVersions(tags []GithubTag) []string {
 	return versions
 }
 
+func (c *GithubClient) ExistsVersion(version string) (bool, error) {
+	tags, err := c.tags()
+	if err != nil {
+		return false, err
+	}
+	for _, tag := range tags {
+		if tag.Name == "v"+version {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func PBMGithubClient(client HTTPClient) *GithubClient {
 	return &GithubClient{
 		Http:      client,
