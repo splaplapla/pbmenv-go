@@ -37,17 +37,19 @@ func main() {
 
 		subCommandArg := args[1]
 		useOption := false
+		installBaseDir := "/usr/share/pbm"
 		if len(args) > 2 {
 			switch args[2] {
 			case "--use", "-u":
 				useOption = true
+			case "--debug_change_install_dir":
+				installBaseDir = "./tmp/pbm"
 			default:
 				fmt.Println("pbmenv: '" + args[2] + "' is not a pbmenv option. See 'pbmenv --help'.")
 				os.Exit(1)
 			}
 		}
-
-		_, err := commands.InstallVersion(&http.Client{}, subCommandArg, useOption)
+		err := commands.InstallVersion(&http.Client{}, subCommandArg, useOption, installBaseDir)
 		if err != nil {
 			log.Fatalf("Error: %s", err)
 		}
