@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"main/internal"
 	"os"
+	"os/exec"
 )
 
 func downloadVersion(client HTTPClient, version string) error {
+	var cmd *exec.Cmd
+	cmd = exec.Command("sh", "-c", fmt.Sprintf("curl -L https://github.com/splaplapla/procon_bypass_man/archive/refs/tags/v%s.tar.gz | tar xvz -C /tmp > /dev/null 2>&1", version))
+	if err := cmd.Run(); err != nil {
+		return err
+	}
 	return nil
 }
 
